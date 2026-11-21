@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>财富星图 · Atlas | 中产的财富增长与守护</title>
+<meta name="description" content="财富星图：一座可以转动的知识星空。14 颗页面恒星、87 颗知识行星（含 9 张可点击的迷你曲线图）、8 座知识库星云——拖动旋转、悬停点亮、点击即达。">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  html,body{height:100%;}
+  body{margin:0;background:#0b0e13;overflow:hidden;}
+  #sky{position:fixed;inset:0;display:block;cursor:grab;}
+  #sky.dragging{cursor:grabbing;}
+  .atlas-brand{position:fixed;top:76px;left:26px;z-index:5;pointer-events:none;}
+  .atlas-brand h1{margin:0;font-family:var(--serif);font-size:26px;letter-spacing:6px;color:#e9dfc7;font-weight:800;}
+  .atlas-brand p{margin:6px 0 0;font-size:12px;color:#7d8794;letter-spacing:2px;}
+  .atlas-hint{position:fixed;bottom:66px;left:50%;transform:translateX(-50%);z-index:5;
+    font-size:12px;color:#8a93a1;letter-spacing:2px;background:rgba(11,14,19,0.55);
+    border:1px solid rgba(216,178,90,0.25);border-radius:999px;padding:7px 18px;pointer-events:none;}
+  .atlas-cta{position:fixed;right:20px;bottom:18px;z-index:6;
+    color:#9aa4b1;text-decoration:none;font-size:13px;letter-spacing:2px;
+    background:rgba(11,14,19,0.55);border:1px solid rgba(216,178,90,0.22);
+    border-radius:999px;padding:7px 16px;
+    transition:color 0.25s,border-color 0.25s;}
+  .atlas-cta:hover{color:#d8b25a;border-color:rgba(216,178,90,0.55);text-decoration:none;}
+  #tip{position:fixed;z-index:8;display:none;max-width:260px;pointer-events:none;
+    background:rgba(16,20,27,0.92);border:1px solid rgba(216,178,90,0.45);border-radius:10px;
+    padding:10px 14px;color:#e9dfc7;font-size:13px;line-height:1.6;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+  #tip b{font-family:var(--serif);font-size:14px;letter-spacing:2px;}
+  #tip span{display:block;color:#9aa4b1;font-size:12px;margin-top:3px;}
+  #cardWrap{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+    background:rgba(5,7,10,0.6);backdrop-filter:blur(4px);}
+  #cardWrap.open{display:flex;}
+  #card{width:min(480px,88vw);max-height:80vh;overflow:auto;background:#12161d;
+    border:1px solid rgba(216,178,90,0.5);border-radius:16px;padding:26px 26px 20px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+  #card h3{margin:0 0 4px;font-family:var(--serif);font-size:20px;letter-spacing:3px;color:#e9dfc7;}
+  #card .from{font-size:11px;color:#8a93a1;letter-spacing:1px;margin-bottom:12px;}
+  #card .desc{font-size:14px;line-height:1.9;color:#c8cdd6;margin-bottom:16px;}
+  #card a{display:block;color:#d8b25a;text-decoration:none;font-size:13px;padding:8px 12px;margin:6px 0;
+    border:1px solid rgba(216,178,90,0.3);border-radius:9px;background:rgba(216,178,90,0.06);}
+  #card a:hover{background:rgba(216,178,90,0.14);}
+  #cardClose{margin-top:8px;width:100%;padding:10px;border-radius:9px;border:1px solid rgba(154,147,138,0.4);
+    background:transparent;color:#9aa4b1;font-size:13px;letter-spacing:2px;cursor:pointer;}
+  #cardClose:hover{color:#e9dfc7;border-color:#d8b25a;}
+  .site-header{background:rgba(11,14,19,0.85) !important;border-bottom:1px solid rgba(216,178,90,0.15) !important;}
+  .site-header a{color:#9aa4b1 !important;}
+  .site-header a.active,.site-header .brand{color:#e9dfc7 !important;}
+  .site-header a.nav-cta{background:#b53d2e !important;color:#fff !important;}
+  @media (max-width:640px){.atlas-brand h1{font-size:20px;letter-spacing:4px;}.atlas-brand{top:70px;left:16px;}}
+</style>
+</head>
+<body data-page="atlas.html">
+<canvas id="sky"></canvas>
+<div class="atlas-brand">
+  <h1>财富星图</h1>
+  <p>守正待时 · 一座会转动的知识星空</p>
+</div>
+<div class="atlas-hint">拖动旋转 · 滚轮缩放 · 悬停点亮 · 点击直达</div>
+<a class="atlas-cta" href="consult.html">预约咨询 · 家庭财富体检 →</a>
+<div id="tip"></div>
+<div id="cardWrap"><div id="card"></div></div>
+<script src="js/atlas.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -55,9 +55,8 @@
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
         <button class="btn-primary" id="btn-generate">生成方案</button>
-        <button class="btn-ghost" id="btn-llm-toggle">AI 解读设置</button>
       </div>
-      <div class="llm-note" id="llm-status">默认使用确定性规则引擎，无需任何 Key；数字与建议全部本地计算。</div>
+      <div class="llm-note" id="llm-status">默认使用确定性规则引擎，无需任何 Key；数字与建议全部本地计算。（点击本行可配置 AI 解读）</div>
 
       <!-- LLM 设置面板 -->
       <div class="report-section" id="llm-panel" style="display:none">
@@ -214,11 +213,15 @@
     });
   });
 
-  // LLM 设置
-  $("btn-llm-toggle").addEventListener("click", function () {
-    var p = $("llm-panel");
-    p.style.display = p.style.display === "none" ? "" : "none";
-  });
+  // LLM 设置：入口统一在状态行（点击打开/关闭面板），不显示任何设置按钮
+  (function () {
+    var st = $("llm-status");
+    st.style.cursor = "pointer";
+    st.onclick = function () {
+      var p = $("llm-panel");
+      p.style.display = p.style.display === "none" ? "" : "none";
+    };
+  })();
   // 服务商切换：自动填 base 与模型
   $("llm-provider").addEventListener("change", function () {
     var p = PROVIDERS[this.value];
@@ -246,21 +249,11 @@
     $("llm-model").value = cfg.model || "";
     $("llm-key").value = cfg.key || "";
   }
-  // 已配置时的界面收起：隐藏设置按钮，状态行点击可重新打开面板
+  // 已配置时的状态行文案（设置入口始终为状态行点击）
   function applyConfiguredUi(on, providerName) {
-    $("btn-llm-toggle").style.display = on ? "none" : "";
-    var st = $("llm-status");
     if (on) {
-      st.textContent = "AI 解读已启用（" + providerName +
+      $("llm-status").textContent = "AI 解读已启用（" + providerName +
         "）。生成方案时将附加 AI 解读。如需修改设置，请点击本行。";
-      st.style.cursor = "pointer";
-      st.onclick = function () {
-        var p = $("llm-panel");
-        p.style.display = p.style.display === "none" ? "" : "none";
-      };
-    } else {
-      st.onclick = null;
-      st.style.cursor = "";
     }
   }
   $("btn-llm-save").addEventListener("click", function () {

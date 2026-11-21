@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>咨询室 · 待时四问 | 中产的财富增长与守护</title>
+<meta name="description" content="输入年龄与焦虑，生成守正待时四维方案：趋势、配置、保险、风险管理。">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="advisor.html">
+<main class="page-wrap">
+
+  <div class="hero">
+    <div class="kicker">咨询室 · 待时四问</div>
+    <h1>你的守正待时方案</h1>
+    <p class="sub">告诉我你的年龄和焦虑，我来算：<br>
+    趋势怎么看 · 配置怎么摆 · 保险怎么配 · 风险怎么守——外加一份不焦虑的建议。</p>
+  </div>
+
+  <section class="reveal">
+    <div class="advisor-panel">
+      <div class="form-row">
+        <label class="fl">① 你的年龄段</label>
+        <select class="age-select" id="age-select">
+          <option value="25-35">25 – 35 岁（事业爬坡期）</option>
+          <option value="36-45" selected>36 – 45 岁（上有老下有小）</option>
+          <option value="46-55">46 – 55 岁（财富攻坚期）</option>
+          <option value="56-65">56 – 65 岁（临近退休）</option>
+          <option value="66+">66 岁以上（养老进行时）</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="fl">② 家庭画像</label>
+        <div class="chip-group" id="family-chips">
+          <span class="chip" data-k="mortgage">有房贷</span>
+          <span class="chip" data-k="kids">子女在学</span>
+          <span class="chip" data-k="parents">需赡养父母</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="fl">③ 什么让你睡不着？（可多选）</label>
+        <div class="chip-group" id="anxiety-chips">
+          <span class="chip" data-k="job">失业降薪</span>
+          <span class="chip" data-k="retire">养老储备</span>
+          <span class="chip" data-k="edu">子女教育</span>
+          <span class="chip" data-k="health">健康医疗</span>
+          <span class="chip" data-k="mortgage">房贷压力</span>
+          <span class="chip" data-k="market">市场波动</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="fl">④ 还想多说一句？（选填）</label>
+        <textarea class="advisor-text" id="free-text"
+          placeholder="例如：两套房一套在还贷，孩子初中，最近公司裁员风声很紧……"></textarea>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <button class="btn-primary" id="btn-generate">生成方案</button>
+        <button class="btn-ghost" id="btn-llm-toggle">AI 解读设置</button>
+      </div>
+      <div class="llm-note" id="llm-status">默认使用确定性规则引擎，无需任何 Key；数字与建议全部本地计算。</div>
+
+      <!-- LLM 设置面板 -->
+      <div class="report-section" id="llm-panel" style="display:none">
+        <h4><span class="num">⚙</span>AI 解读设置（可选）</h4>
+        <p style="font-size:14px;color:#5a564d">
+          填入你的 API Key 后，AI 会基于上面规则引擎算出的数据做「人话解读」——<b>所有数字仍由本地规则引擎产出，AI 不碰计算</b>。Key 仅存于你浏览器本地（localStorage），不会上传到本站。</p>
+        <div class="form-row">
+          <label class="fl">服务商</label>
+          <select class="age-select" id="llm-provider">
+            <option value="deepseek">DeepSeek</option>
+            <option value="siliconflow">硅基流动</option>
+            <option value="zhipu">智谱</option>
+            <option value="moonshot">Moonshot</option>
+            <option value="qwen">通义千问</option>
+            <option value="custom">自定义（OpenAI 兼容）</option>
+          </select>
+        </div>
+        <div class="form-row" id="llm-custom-row" style="display:none">
+          <label class="fl">自定义 Endpoint（含 /chat/completions）</label>
+          <input class="age-select" id="llm-endpoint" placeholder="https://…/v1/chat/completions">
+        </div>
+        <div class="form-row">
+          <label class="fl">API Key</label>
+          <input class="age-select" id="llm-key" type="password" placeholder="sk-…">
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <button class="btn-ghost" id="btn-llm-save">保存设置</button>
+          <button class="btn-ghost" id="btn-llm-clear">清除</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal" id="report" style="display:none">
+    <div class="section-title"><span class="bar"></span>守正待时方案<span class="en" id="report-meta"></span></div>
+
+    <div class="advisor-panel">
+      <div class="report-section" style="border-top:none;padding-top:0;margin-top:0">
+        <h4><span class="num">1</span>趋势判断 · 怎么看</h4>
+        <p id="r-trend"></p>
+        <p style="font-size:14px"><a id="r-trend-url" href="#" target="_blank" rel="noopener">亲手用周期定位器定位 →</a></p>
+      </div>
+
+      <div class="report-section">
+        <h4><span class="num">2</span>投资配置建议 · 参考带</h4>
+        <div class="alloc-bar" id="r-alloc-bar"></div>
+        <div class="alloc-legend" id="r-alloc-legend"></div>
+        <p style="font-size:14px;color:#5a564d;margin-top:8px">
+          以上是<b>参考带</b>而非精确指令：结合自己的风险承受力在此带内取值；调仓<b>分批</b>执行。配套阅读：</p>
+        <ul id="r-invest-links"></ul>
+      </div>
+
+      <div class="report-section">
+        <h4><span class="num">3</span>保险配置建议 · 藏器于身</h4>
+        <ul id="r-insurance"></ul>
+        <p style="font-size:13px;color:#5a564d">先保额后储蓄；本文仅为知识梳理，具体产品请自行比较合同条款。</p>
+      </div>
+
+      <div class="report-section">
+        <h4><span class="num">4</span>风险管理建议 · 守正清单</h4>
+        <p style="font-size:15px"><b>应急现金底线：<span id="r-emergency"></span> 个月家庭刚性支出</b></p>
+        <ul id="r-risk"></ul>
+      </div>
+
+      <div class="report-section">
+        <h4><span class="num">5</span>待时四问</h4>
+        <div id="r-fourq"></div>
+      </div>
+
+      <div class="report-section" id="r-llm-section" style="display:none">
+        <h4><span class="num">✦</span>AI 朋友解读<span class="en" style="font-size:12px;color:#bb8a1f">基于以上规则引擎数据 · 非投资建议</span></h4>
+        <div id="r-llm-text" style="font-size:15px;line-height:1.9;white-space:pre-wrap"></div>
+      </div>
+
+      <div class="zen-box" id="r-zen">
+        <h4>不焦虑建议 · 行到水穷处，坐看云起时</h4>
+        <div id="r-zen-list"></div>
+        <p class="closing">生活安好 · 出行安好 · 岁月静好</p>
+      </div>
+
+      <div class="report-section">
+        <p style="font-size:13px;color:#8a857a">
+          本方案由确定性规则引擎于 <span id="r-generated"></span> 生成，基于年龄段与所选焦虑的通用规则，
+          不构成投资建议或保险购买建议；具体决策请结合自身情况并咨询持牌人士。
+        </p>
+      </div>
+    </div>
+
+    <div class="cta-banner" style="margin-top:26px">
+      <div class="cta-left">
+        <div class="cta-icon">💰</div>
+        <div>
+          <div class="cta-title">想要按你家情况定制的完整版？</div>
+          <div class="cta-sub">99 元家庭财富体检：书面四维方案 + 30 分钟微信答疑 · 不代销产品 · 15 分钟内可全额退款</div>
+        </div>
+      </div>
+      <a class="cta-btn" href="consult.html">预约咨询 →</a>
+    </div>
+  </section>
+
+</main>
+<script src="js/main.js"></script>
+<script src="js/advisor-tools.js"></script>
+<script src="js/gate.js"></script>
+<script>
+(function () {
+  "use strict";
+  var T = window.AdvisorTools;
+  var LLS_KEY = "xh-llk-config";
+  var PROVIDERS = {
+    deepseek:    { name: "DeepSeek", endpoint: "https://api.deepseek.com/v1/chat/completions", model: "deepseek-chat" },
+    siliconflow: { name: "硅基流动", endpoint: "https://api.siliconflow.cn/v1/chat/completions", model: "deepseek-ai/DeepSeek-V3" },
+    zhipu:       { name: "智谱", endpoint: "https://open.bigmodel.cn/api/paas/v4/chat/completions", model: "glm-4-flash" },
+    moonshot:    { name: "Moonshot", endpoint: "https://api.moonshot.cn/v1/chat/completions", model: "moonshot-v1-8k" },
+    qwen:        { name: "通义千问", endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", model: "qwen-plus" }
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function selectedKeys(containerId) {
+    return Array.prototype.map.call(
+      document.querySelectorAll("#" + containerId + " .chip.selected"),
+      function (el) { return el.getAttribute("data-k"); });
+  }
+  // chip 交互
+  document.querySelectorAll(".chip-group").forEach(function (g) {
+    g.addEventListener("click", function (e) {
+      if (e.target.classList.contains("chip")) {
+        e.target.classList.toggle("selected");
+      }
+    });
+  });
+
+  // LLM 设置
+  $("btn-llm-toggle").addEventListener("click", function () {
+    var p = $("llm-panel");
+    p.style.display = p.style.display === "none" ? "" : "none";
+  });
+  $("llm-provider").addEventListener("change", function () {
+    $("llm-custom-row").style.display =
+      this.value === "custom" ? "" : "none";
+  });
+  $("btn-llm-save").addEventListener("click", function () {
+    var prov = $("llm-provider").value;
+    var cfg = { provider: prov,
+      key: $("llm-key").value.trim(),
+      endpoint: prov === "custom" ? $("llm-endpoint").value.trim() : PROVIDERS[prov].endpoint,
+      model: prov === "custom" ? "" : PROVIDERS[prov].model };
+    if (!cfg.key) { alert("请填入 API Key"); return; }
+    if (prov === "custom" && !cfg.endpoint) { alert("请填入自定义 Endpoint"); return; }
+    localStorage.setItem(LLS_KEY, JSON.stringify(cfg));
+    $("llm-status").textContent = "已保存：" + (prov === "custom" ? "自定义" : PROVIDERS[prov].name) +
+      "。生成方案时将附加 AI 解读。";
+    $("llm-panel").style.display = "none";
+  });
+  $("btn-llm-clear").addEventListener("click", function () {
+    localStorage.removeItem(LLS_KEY);
+    $("llm-key").value = "";
+    $("llm-status").textContent = "已清除 AI 设置。默认使用确定性规则引擎。";
+  });
+  (function restoreLlm() {
+    try {
+      var cfg = JSON.parse(localStorage.getItem(LLS_KEY) || "null");
+      if (cfg && cfg.key) {
+        $("llm-provider").value = cfg.provider;
+        $("llm-status").textContent = "AI 解读已启用（" +
+          (cfg.provider === "custom" ? "自定义" : PROVIDERS[cfg.provider].name) +
+          "）。生成方案时将附加 AI 解读。";
+      }
+    } catch (e) {}
+  })();
+
+  function liHtml(rec) {
+    return '<li><b>' + rec.item + '</b> — ' + rec.why +
+      (rec.url ? ' <a href="' + rec.url + '" target="_blank" rel="noopener">原文 →</a>' : "") + "</li>";
+  }
+
+  function renderReport(plan) {
+    $("report").style.display = "";
+    $("report-meta").textContent = plan.profile.ageGroup + " 岁 · " +
+      (plan.profile.anxieties.join("、") || "无特别焦虑") +
+      (plan.profile.hasMortgage ? " · 有房贷" : "");
+    // 1 趋势
+    $("r-trend").textContent = plan.trend.text;
+    $("r-trend-url").href = plan.trend.url;
+    // 2 配置
+    var a = plan.alloc;
+    $("r-alloc-bar").innerHTML =
+      '<span class="ab-eq" style="width:' + a.eq + '%">股 ' + a.eq + '%</span>' +
+      '<span class="ab-bd" style="width:' + a.bond + '%">债 ' + a.bond + '%</span>' +
+      '<span class="ab-gd" style="width:' + a.gold + '%">金 ' + a.gold + '%</span>' +
+      '<span class="ab-cs" style="width:' + a.cash + '%">现金 ' + a.cash + '%</span>';
+    $("r-alloc-legend").textContent = "股（权益/指数基金）· 债（债券/固收）· 金（黄金）· 现金（货币/短债）";
+    $("r-invest-links").innerHTML = plan.investLinks.map(function (l) {
+      return '<li><a href="' + l.url + '" target="_blank" rel="noopener">' + l.t + '</a></li>';
+    }).join("");
+    // 3 保险
+    $("r-insurance").innerHTML = plan.insurance.map(liHtml).join("");
+    // 4 风险
+    $("r-emergency").textContent = plan.risk.emergencyMonths;
+    $("r-risk").innerHTML = plan.risk.items.map(liHtml).join("");
+    // 5 四问
+    var fq = plan.fourQuestions;
+    $("r-fourq").innerHTML = ["now", "future", "risk", "opportunity"].map(function (k) {
+      return '<div style="margin-bottom:12px"><b style="font-family:var(--serif);color:#b53d2e">问：' +
+        fq[k].q + '</b><br><span style="font-size:15px">' + fq[k].a + "</span></div>";
+    }).join("");
+    // zen
+    $("r-zen-list").innerHTML = plan.zen.map(function (s) {
+      return "<p>" + s + "</p>";
+    }).join("");
+    $("r-generated").textContent = plan.generatedAt;
+    $("report").scrollIntoView({ behavior: "smooth" });
+    return plan;
+  }
+
+  function llmCall(cfg, plan, freeText) {
+    var prompt =
+      "你是一位资深精算师朋友（「西红精算」品牌），正在为一个中产家庭解读他刚生成的「守正待时」财富方案。" +
+      "请用温暖、说人话、结构清晰的中文（800字内）解读以下方案数据，重点：解释为什么这样配置、优先做哪件事、" +
+      "给一句最需要记住的话。禁止编造新数字、禁止推荐具体产品或个股、禁止更改方案数据。" +
+      "\n\n用户情况：年龄段=" + plan.profile.ageGroup + "，焦虑=" +
+      plan.profile.anxieties.join("、") + "，有房贷=" + plan.profile.hasMortgage +
+      (freeText ? "，补充描述=" + freeText : "") +
+      "\n方案数据（JSON）：" + JSON.stringify({
+        alloc: plan.alloc, trendRegime: plan.trend.regime,
+        emergencyMonths: plan.risk.emergencyMonths,
+        insurance: plan.insurance.map(function (r) { return r.item; })
+      });
+    var body = JSON.stringify({
+      model: cfg.model || "deepseek-chat",
+      messages: [
+        { role: "system", content: "你是西红精算，一位用真心做科普的资深精算师朋友。只基于给定数据解读，不编造数字。" },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.7, max_tokens: 1200
+    });
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 30000);
+    return fetch(cfg.endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json",
+        "Authorization": "Bearer " + cfg.key },
+      body: body, signal: ctrl.signal
+    }).then(function (r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (j) {
+      var txt = j.choices && j.choices[0] && j.choices[0].message &&
+        j.choices[0].message.content;
+      if (!txt) throw new Error("响应格式异常");
+      return txt.trim();
+    });
+  }
+
+  $("btn-generate").addEventListener("click", function () {
+    var anx = selectedKeys("anxiety-chips");
+    var fam = selectedKeys("family-chips");
+    var input = {
+      ageGroup: $("age-select").value,
+      anxieties: anx,
+      hasMortgage: fam.indexOf("mortgage") >= 0 || anx.indexOf("mortgage") >= 0
+    };
+    var freeText = $("free-text").value.trim();
+    var plan;
+    try { plan = T.generatePlan(input); }
+    catch (e) { alert(e.message); return; }
+    renderReport(plan);
+    // 完整方案口令门：摘要免费（趋势+配置带），完整方案需口令
+    if (window.WGate) window.WGate.applyToReport();
+
+    // AI 解读（可选）
+    var cfg = null;
+    try { cfg = JSON.parse(localStorage.getItem(LLS_KEY) || "null"); } catch (e) {}
+    var sec = $("r-llm-section"), box = $("r-llm-text");
+    if (cfg && cfg.key) {
+      sec.style.display = "";
+      box.textContent = "正在请 AI 朋友解读…（30 秒超时，失败不影响方案本身）";
+      llmCall(cfg, plan, freeText).then(function (txt) {
+        box.textContent = txt;
+      }).catch(function (e) {
+        box.textContent = "AI 解读暂不可用（" + e.message +
+          "），以上规则引擎方案仍然完整有效。";
+      });
+    } else {
+      sec.style.display = "none";
+    }
+  });
+})();
+</script>
+</body>
+</html>

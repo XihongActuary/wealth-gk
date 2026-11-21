@@ -1010,3 +1010,59 @@ html.night body::after {
 /* 夜色下提亮内嵌 SVG 图表的文字（覆盖硬编码 fill） */
 html.night svg text { fill: #9aa4b1; }
 html.night svg text[fill="#2b2a26"] { fill: #9aa4b1; }
+
+/* ---------- advisor · 方案保存/转发按钮栏 ---------- */
+.rp-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: -6px 0 14px;
+}
+.rp-actions-note { font-size: 12px; color: var(--ink-soft); letter-spacing: 1px; }
+
+/* ---------- advisor · AI 解读排版 ---------- */
+.ai-text { font-size: 15.5px; line-height: 2.0; color: var(--ink); }
+.ai-text p { margin: 0 0 14px; }
+.ai-open {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--cinnabar);
+  letter-spacing: 1px;
+}
+.ai-h {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--ink);
+  margin: 22px 0 10px;
+  padding-left: 12px;
+  border-left: 4px solid var(--cinnabar);
+}
+.ai-h:first-letter { color: var(--cinnabar); }
+.ai-core {
+  background: rgba(181, 61, 46, 0.06);
+  border-left: 4px solid var(--cinnabar);
+  padding: 12px 16px;
+  border-radius: 0 10px 10px 0;
+  font-weight: 700;
+}
+.ai-warm {
+  font-family: var(--serif);
+  background: linear-gradient(135deg, rgba(187, 138, 31, 0.12), rgba(187, 138, 31, 0.04));
+  border: 1px solid rgba(187, 138, 31, 0.4);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 16px 0 14px;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.9;
+}
+.ai-warm b, .ai-warm strong { color: #8a6410; }
+.ai-text b { color: var(--cinnabar); }
+html.night .ai-text { color: var(--ink); }
+html.night .ai-warm { background: rgba(187, 138, 31, 0.14); }
+html.night .ai-warm b, html.night .ai-warm strong { color: #d8b25a; }
+html.night .ai-core { background: rgba(181, 61, 46, 0.16); }

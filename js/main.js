@@ -8,10 +8,10 @@
 (function () {
   "use strict";
 
-  /* ---------- 黑夜星空模式：尽早应用，避免闪白 ---------- */
+  /* ---------- 黑夜星空模式：默认夜晚，除非用户手动切回日间 ---------- */
   var NIGHT_KEY = "wealth-night";
   try {
-    if (localStorage.getItem(NIGHT_KEY) === "1") {
+    if (localStorage.getItem(NIGHT_KEY) !== "0") {
       document.documentElement.classList.add("night");
     }
   } catch (e) { /* ignore */ }

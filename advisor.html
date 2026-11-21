@@ -188,6 +188,22 @@
   "use strict";
   var T = window.AdvisorTools;
   var LLS_KEY = "xh-llk-config";
+  // 内置默认 AI 配置：访客无需任何配置即可使用 AI 解读（如需更换，点击状态行打开设置面板本地覆盖）
+  var DEFAULT_LLM = {
+    provider: "deepseek",
+    base: "https://api.deepseek.com",
+    model: "deepseek-v4-pro",
+    key: "sk-b2ebdea881ea4f1eb33a47141ed49e4c",
+    bigBudget: true
+  };
+  function validCfg(c) { return c && c.base && c.model && (c.key || c.provider === "ollama"); }
+  // 读取生效配置：本地已保存的优先，否则用内置默认
+  function getLlmCfg() {
+    var cfg = null;
+    try { cfg = migrateCfg(JSON.parse(localStorage.getItem(LLS_KEY) || "null")); } catch (e) {}
+    if (validCfg(cfg)) return cfg;
+    return DEFAULT_LLM;
+  }
   var PROVIDERS = {
     deepseek:    { name: "DeepSeek",  base: "https://api.deepseek.com/v1",                       model: "deepseek-chat" },
     siliconflow: { name: "硅基流动",  base: "https://api.siliconflow.cn/v1",                     model: "deepseek-ai/DeepSeek-V3" },
@@ -276,18 +292,14 @@
     localStorage.removeItem(LLS_KEY);
     $("llm-key").value = "";
     $("llm-diag").style.display = "none";
-    $("llm-status").textContent = "已清除 AI 设置。默认使用确定性规则引擎。";
+    $("llm-status").textContent = "已清除本地修改，恢复内置默认 AI 配置（DeepSeek）。";
     applyConfiguredUi(false);
   });
   (function restoreLlm() {
-    try {
-      var cfg = migrateCfg(JSON.parse(localStorage.getItem(LLS_KEY) || "null"));
-      if (cfg && cfg.base && cfg.model && (cfg.key || cfg.provider === "ollama")) {
-        fillCfgInputs(cfg);
-        localStorage.setItem(LLS_KEY, JSON.stringify(cfg)); // 回写迁移后的格式
-        applyConfiguredUi(true, PROVIDERS[cfg.provider].name);
-      }
-    } catch (e) {}
+    var cfg = getLlmCfg();
+    fillCfgInputs(cfg);
+    var name = (PROVIDERS[cfg.provider] || {}).name || "AI";
+    applyConfiguredUi(true, name);
   })();
 
   /* ---------- 诊断与测试连接（参考 life-insurance-qa-agent 方法） ---------- */
@@ -591,6 +603,8 @@
         insurance: plan.insurance.map(function (r) { return r.item; })
       });
     var isReasoner = /reasoner|r1|thinking/i.test(cfg.model || "");
+    // 推理型模型剥 system/temperature；v4-pro 等接受 system 但思考占预算，加大 max_tokens
+    var budget = (isReasoner || cfg.bigBudget) ? 16000 : (MT_MAX[cfg.provider] || 8192);
     var body = JSON.stringify({
       model: cfg.model,
       messages: isReasoner ? [
@@ -600,7 +614,7 @@
         { role: "user", content: prompt }
       ],
       temperature: isReasoner ? undefined : 0.7,
-      max_tokens: isReasoner ? 16000 : (MT_MAX[cfg.provider] || 8192),
+      max_tokens: budget,
       stream: true
     });
     var ctrl = new AbortController();
@@ -858,11 +872,10 @@
     // 完整方案口令门：摘要免费（趋势+配置带），完整方案需口令
     if (window.WGate) window.WGate.applyToReport();
 
-    // AI 解读（可选）
-    var cfg = null;
-    try { cfg = migrateCfg(JSON.parse(localStorage.getItem(LLS_KEY) || "null")); } catch (e) {}
+    // AI 解读（内置默认配置，开箱即用）
+    var cfg = getLlmCfg();
     var sec = $("r-llm-section"), box = $("r-llm-text");
-    if (cfg && cfg.base && cfg.model && (cfg.key || cfg.provider === "ollama")) {
+    if (validCfg(cfg)) {
       sec.style.display = "";
       box.innerHTML = '<p style="color:#5a564d">正在请 AI 朋友解读…（边写边显示，稍等几秒开始）</p>';
       var partial = "";

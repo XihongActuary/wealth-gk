@@ -63,7 +63,7 @@
       <div class="report-section" id="llm-panel" style="display:none">
         <h4><span class="num">⚙</span>AI 解读设置（可选）</h4>
         <p style="font-size:14px;color:#5a564d">
-          填入你的 API Key 后，AI 会基于上面规则引擎算出的数据做「人话解读」——<b>所有数字仍由本地规则引擎产出，AI 不碰计算</b>。Key 仅存于你浏览器本地（localStorage），不会上传到本站。</p>
+          填入你的 API Key 后，AI 会基于上面规则引擎算出的数据做「人话解读」——<b>所有数字仍由本地规则引擎产出，AI 不碰计算</b>。Key 仅存于你浏览器本地（localStorage），不会上传到本站。选服务商后接口地址与模型自动填好，一般不用改；测试连接通过即可使用。</p>
         <div class="form-row">
           <label class="fl">服务商</label>
           <select class="age-select" id="llm-provider">
@@ -72,21 +72,28 @@
             <option value="zhipu">智谱</option>
             <option value="moonshot">Moonshot</option>
             <option value="qwen">通义千问</option>
+            <option value="ollama">Ollama（本机）</option>
             <option value="custom">自定义（OpenAI 兼容）</option>
           </select>
         </div>
-        <div class="form-row" id="llm-custom-row" style="display:none">
-          <label class="fl">自定义 Endpoint（含 /chat/completions）</label>
-          <input class="age-select" id="llm-endpoint" placeholder="https://…/v1/chat/completions">
+        <div class="form-row">
+          <label class="fl">接口地址</label>
+          <input class="age-select" id="llm-base" placeholder="https://api.deepseek.com/v1">
+        </div>
+        <div class="form-row">
+          <label class="fl">模型名称</label>
+          <input class="age-select" id="llm-model" placeholder="deepseek-chat">
         </div>
         <div class="form-row">
           <label class="fl">API Key</label>
-          <input class="age-select" id="llm-key" type="password" placeholder="sk-…">
+          <input class="age-select" id="llm-key" type="password" placeholder="sk-…（Ollama 本机可不填）">
         </div>
-        <div style="display:flex;gap:12px;align-items:center">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <button class="btn-ghost" id="btn-llm-save">保存设置</button>
+          <button class="btn-ghost" id="btn-llm-test">测试连接</button>
           <button class="btn-ghost" id="btn-llm-clear">清除</button>
         </div>
+        <div id="llm-diag" class="llm-note" style="white-space:pre-wrap;display:none;margin-top:12px"></div>
       </div>
     </div>
   </section>
@@ -96,6 +103,11 @@
 
     <div class="advisor-panel">
       <div class="report-section" style="border-top:none;padding-top:0;margin-top:0">
+        <h4><span class="num">◎</span>针对你的情况 · 本次方案的定制点</h4>
+        <div id="r-personal"></div>
+      </div>
+
+      <div class="report-section">
         <h4><span class="num">1</span>趋势判断 · 怎么看</h4>
         <p id="r-trend"></p>
         <p style="font-size:14px"><a id="r-trend-url" href="#" target="_blank" rel="noopener">亲手用周期定位器定位 →</a></p>
@@ -108,11 +120,13 @@
         <p style="font-size:14px;color:#5a564d;margin-top:8px">
           以上是<b>参考带</b>而非精确指令：结合自己的风险承受力在此带内取值；调仓<b>分批</b>执行。配套阅读：</p>
         <ul id="r-invest-links"></ul>
+        <div id="r-invest-aug"></div>
       </div>
 
       <div class="report-section">
         <h4><span class="num">3</span>保险配置建议 · 藏器于身</h4>
         <ul id="r-insurance"></ul>
+        <div id="r-insurance-aug"></div>
         <p style="font-size:13px;color:#5a564d">先保额后储蓄；本文仅为知识梳理，具体产品请自行比较合同条款。</p>
       </div>
 
@@ -120,16 +134,18 @@
         <h4><span class="num">4</span>风险管理建议 · 守正清单</h4>
         <p style="font-size:15px"><b>应急现金底线：<span id="r-emergency"></span> 个月家庭刚性支出</b></p>
         <ul id="r-risk"></ul>
+        <div id="r-risk-aug"></div>
       </div>
 
       <div class="report-section">
         <h4><span class="num">5</span>待时四问</h4>
         <div id="r-fourq"></div>
+        <div id="r-fourq-aug"></div>
       </div>
 
       <div class="report-section" id="r-llm-section" style="display:none">
         <h4><span class="num">✦</span>AI 朋友解读<span class="en" style="font-size:12px;color:#bb8a1f">基于以上规则引擎数据 · 非投资建议</span></h4>
-        <div id="r-llm-text" style="font-size:15px;line-height:1.9;white-space:pre-wrap"></div>
+        <div id="r-llm-text" class="ai-text"></div>
       </div>
 
       <div class="zen-box" id="r-zen">
@@ -156,6 +172,12 @@
       </div>
       <a class="cta-btn" href="consult.html">预约咨询 →</a>
     </div>
+
+    <div class="rp-actions" style="margin-top:18px;justify-content:center">
+      <button class="btn-ghost" id="btn-save">⬇ 保存方案</button>
+      <span class="rp-actions-note">保存为可离线阅读的网页文件 · 发给家人一起看</span>
+      <span class="rp-actions-note" id="share-status" style="color:#b53d2e;font-weight:700"></span>
+    </div>
   </section>
 
 </main>
@@ -168,11 +190,13 @@
   var T = window.AdvisorTools;
   var LLS_KEY = "xh-llk-config";
   var PROVIDERS = {
-    deepseek:    { name: "DeepSeek", endpoint: "https://api.deepseek.com/v1/chat/completions", model: "deepseek-chat" },
-    siliconflow: { name: "硅基流动", endpoint: "https://api.siliconflow.cn/v1/chat/completions", model: "deepseek-ai/DeepSeek-V3" },
-    zhipu:       { name: "智谱", endpoint: "https://open.bigmodel.cn/api/paas/v4/chat/completions", model: "glm-4-flash" },
-    moonshot:    { name: "Moonshot", endpoint: "https://api.moonshot.cn/v1/chat/completions", model: "moonshot-v1-8k" },
-    qwen:        { name: "通义千问", endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", model: "qwen-plus" }
+    deepseek:    { name: "DeepSeek",  base: "https://api.deepseek.com/v1",                       model: "deepseek-chat" },
+    siliconflow: { name: "硅基流动",  base: "https://api.siliconflow.cn/v1",                     model: "deepseek-ai/DeepSeek-V3" },
+    zhipu:       { name: "智谱",      base: "https://open.bigmodel.cn/api/paas/v4",              model: "glm-4-flash" },
+    moonshot:    { name: "Moonshot",  base: "https://api.moonshot.cn/v1",                        model: "moonshot-v1-8k" },
+    qwen:        { name: "通义千问",  base: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
+    ollama:      { name: "Ollama（本机）", base: "http://localhost:11434/v1",                     model: "qwen2.5:7b" },
+    custom:      { name: "自定义",    base: "",                                                   model: "" }
   };
 
   function $(id) { return document.getElementById(id); }
@@ -195,50 +219,321 @@
     var p = $("llm-panel");
     p.style.display = p.style.display === "none" ? "" : "none";
   });
+  // 服务商切换：自动填 base 与模型
   $("llm-provider").addEventListener("change", function () {
-    $("llm-custom-row").style.display =
-      this.value === "custom" ? "" : "none";
+    var p = PROVIDERS[this.value];
+    if (p) { $("llm-base").value = p.base; $("llm-model").value = p.model; }
   });
+  // 兼容旧配置（endpoint → base 迁移）
+  function migrateCfg(raw) {
+    if (!raw) return null;
+    if (raw.endpoint && !raw.base) {
+      raw.base = String(raw.endpoint).replace(/\/chat\/completions\/?$/, "");
+      raw.provider = raw.provider === "custom" ? "custom" : raw.provider;
+      delete raw.endpoint;
+    }
+    return raw;
+  }
+  function readCfgInputs() {
+    return { provider: $("llm-provider").value,
+      base: $("llm-base").value.trim(),
+      model: $("llm-model").value.trim(),
+      key: $("llm-key").value.trim() };
+  }
+  function fillCfgInputs(cfg) {
+    $("llm-provider").value = cfg.provider || "deepseek";
+    $("llm-base").value = cfg.base || "";
+    $("llm-model").value = cfg.model || "";
+    $("llm-key").value = cfg.key || "";
+  }
+  // 已配置时的界面收起：隐藏设置按钮，状态行点击可重新打开面板
+  function applyConfiguredUi(on, providerName) {
+    $("btn-llm-toggle").style.display = on ? "none" : "";
+    var st = $("llm-status");
+    if (on) {
+      st.textContent = "AI 解读已启用（" + providerName +
+        "）。生成方案时将附加 AI 解读。如需修改设置，请点击本行。";
+      st.style.cursor = "pointer";
+      st.onclick = function () {
+        var p = $("llm-panel");
+        p.style.display = p.style.display === "none" ? "" : "none";
+      };
+    } else {
+      st.onclick = null;
+      st.style.cursor = "";
+    }
+  }
   $("btn-llm-save").addEventListener("click", function () {
-    var prov = $("llm-provider").value;
-    var cfg = { provider: prov,
-      key: $("llm-key").value.trim(),
-      endpoint: prov === "custom" ? $("llm-endpoint").value.trim() : PROVIDERS[prov].endpoint,
-      model: prov === "custom" ? "" : PROVIDERS[prov].model };
-    if (!cfg.key) { alert("请填入 API Key"); return; }
-    if (prov === "custom" && !cfg.endpoint) { alert("请填入自定义 Endpoint"); return; }
+    var cfg = readCfgInputs();
+    var p = PROVIDERS[cfg.provider];
+    if (!cfg.key && cfg.provider !== "ollama") { alert("请填入 API Key（Ollama 本机可留空）"); return; }
+    if (!cfg.base) { alert("请填入接口地址（选服务商后会自动填好）"); return; }
+    if (!cfg.model) { alert("请填入模型名称（选服务商后会自动填好）"); return; }
+    if (cfg.provider === "ollama" && location.protocol === "https:") {
+      alert("当前页面是 https，浏览器会拦截 http://localhost 请求；建议改用硅基流动等云端服务商。");
+      return;
+    }
     localStorage.setItem(LLS_KEY, JSON.stringify(cfg));
-    $("llm-status").textContent = "已保存：" + (prov === "custom" ? "自定义" : PROVIDERS[prov].name) +
-      "。生成方案时将附加 AI 解读。";
+    $("llm-status").textContent = "已保存：" + p.name +
+      "。生成方案时将附加 AI 解读。建议先点一次「测试连接」确认可用。";
     $("llm-panel").style.display = "none";
+    applyConfiguredUi(true, p.name);
   });
   $("btn-llm-clear").addEventListener("click", function () {
     localStorage.removeItem(LLS_KEY);
     $("llm-key").value = "";
+    $("llm-diag").style.display = "none";
     $("llm-status").textContent = "已清除 AI 设置。默认使用确定性规则引擎。";
+    applyConfiguredUi(false);
   });
   (function restoreLlm() {
     try {
-      var cfg = JSON.parse(localStorage.getItem(LLS_KEY) || "null");
-      if (cfg && cfg.key) {
-        $("llm-provider").value = cfg.provider;
-        $("llm-status").textContent = "AI 解读已启用（" +
-          (cfg.provider === "custom" ? "自定义" : PROVIDERS[cfg.provider].name) +
-          "）。生成方案时将附加 AI 解读。";
+      var cfg = migrateCfg(JSON.parse(localStorage.getItem(LLS_KEY) || "null"));
+      if (cfg && cfg.base && cfg.model && (cfg.key || cfg.provider === "ollama")) {
+        fillCfgInputs(cfg);
+        localStorage.setItem(LLS_KEY, JSON.stringify(cfg)); // 回写迁移后的格式
+        applyConfiguredUi(true, PROVIDERS[cfg.provider].name);
       }
     } catch (e) {}
   })();
+
+  /* ---------- 诊断与测试连接（参考 life-insurance-qa-agent 方法） ---------- */
+  function chatUrl(base) {
+    var b = String(base).replace(/\/+$/, "");
+    if (/\/chat\/completions$/.test(b)) return b;
+    return b + "/chat/completions";
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function diag(html) {
+    var d = $("llm-diag");
+    d.style.display = "";
+    d.innerHTML += html + "<br>";
+  }
+  function adviceFor(code, body) {
+    var m = "";
+    try { m = (JSON.parse(body).error || {}).message || ""; } catch (e) {}
+    var a = {
+      401: "密钥无效或已过期 → 重新生成一个 API Key 粘贴进来",
+      402: "账户余额不足 → 去服务商后台充值（DeepSeek 新号常见）",
+      403: "密钥没有该模型的权限 → 换模型名或换 Key",
+      404: "接口地址或模型名不对 → 地址要以 /v1 结尾，模型名照抄服务商控制台",
+      422: "请求参数不被接受 → 多半是模型名填错",
+      429: "触发限流或并发超限 → 等一会儿再试"
+    }[code] || "服务端返回：" + esc(String(body).slice(0, 200));
+    if (m) a += "（服务商原文：" + esc(String(m).slice(0, 160)) + "）";
+    return a;
+  }
+  function testConnection() {
+    var d = $("llm-diag");
+    d.style.display = ""; d.innerHTML = "";
+    var cfg = readCfgInputs();
+    var url = cfg.base ? chatUrl(cfg.base) : "";
+    diag("① 请求地址：" + esc(url || "（未填）"));
+    if (!/^https?:\/\//i.test(url)) { diag("✗ 地址不完整，必须以 http:// 或 https:// 开头", ""); return; }
+    if (location.protocol === "https:" && /^http:\/\//i.test(url)) {
+      diag("✗ 当前页面是 https，浏览器会拦截 http 请求（混合内容）。请改用 https 云端服务商。"); return;
+    }
+    if (!/\/chat\/completions$/.test(url)) diag("⚠ 地址末尾不是 /chat/completions，已自动补全。若仍失败，检查是否漏了 /v1");
+    if (!cfg.key && cfg.provider !== "ollama") { diag("✗ 未填 API Key"); return; }
+    if (!cfg.model) { diag("✗ 未填模型名称"); return; }
+    diag("② 正在探测（跨域预检 + 真实请求）…");
+    var t0 = Date.now();
+    fetch(url, { method: "POST",
+      headers: { "Content-Type": "application/json",
+        "Authorization": "Bearer " + cfg.key },
+      body: JSON.stringify({ model: cfg.model,
+        messages: [{ role: "user", content: "说" }], max_tokens: 1, stream: false }) })
+      .then(function (r) {
+        return r.text().then(function (t) {
+          var ms = Date.now() - t0;
+          if (r.status === 200) { diag("③ HTTP 200 ✓ 连接成功，耗时 " + ms + "ms"); diag("模型可用，保存后生成方案即可看到 AI 解读。"); return; }
+          diag("③ HTTP " + r.status + "（耗时 " + ms + "ms）");
+          diag("④ 判定：" + adviceFor(r.status, t));
+        });
+      })
+      .catch(function (err) {
+        diag("③ 请求未能送达（" + esc(String(err && err.message || err)) + "）");
+        diag("④ 判定：请求被拦在到达服务商之前，按以下顺序排查：");
+        diag("1. 网络/防火墙是否屏蔽该域名（可换网络或用手机热点试）");
+        diag("2. 广告拦截、隐私类浏览器扩展是否拦截（可无痕窗口试）");
+        diag("3. 地址是否填错（漏 https:// 前缀、多了中文空格等）");
+        diag("4. 若在本地 file:// 打开，请改用线上地址访问");
+      });
+  }
+  $("btn-llm-test").addEventListener("click", testConnection);
 
   function liHtml(rec) {
     return '<li><b>' + rec.item + '</b> — ' + rec.why +
       (rec.url ? ' <a href="' + rec.url + '" target="_blank" rel="noopener">原文 →</a>' : "") + "</li>";
   }
 
-  function renderReport(plan) {
+  /* ---------- 定制层：按年龄/家庭/焦虑/选填逐点回应 ---------- */
+  var AGE_LABEL = {
+    "25-35": "25–35 岁（事业爬坡期）", "36-45": "36–45 岁（上有老下有小）",
+    "46-55": "46–55 岁（财富攻坚期）", "56-65": "56–65 岁（临近退休）",
+    "66+": "66 岁以上（养老进行时）"
+  };
+  var FAM_LABEL = { mortgage: "有房贷", kids: "子女在学", parents: "需赡养父母" };
+  var ANX_LABEL = { job: "失业降薪", retire: "养老储备", edu: "子女教育", health: "健康医疗", mortgage: "房贷压力", market: "市场波动" };
+  var ANX_ADVICE = {
+    job: function (age) {
+      var m = (age === "25-35") ? "你输得起时间，但要先攒下输得起的现金：应急底线拉到 9 个月，现金流资产优先于长锁资产。"
+            : (age === "66+") ? "这个年纪最怕的不是失业，而是被迫低卖资产——应急现金留足 12 个月，任何人劝你「换个高收益的」都要多想三天。"
+            : "上有老下有小的年纪，失业风险要按「家庭风险」而不是「个人风险」对待：应急现金 9–12 个月起步，先加固防线再谈进攻。";
+      return { t: "现金流防线优先", w: m + "方案中的应急现金底线与风险守正清单就是为此设的。" };
+    },
+    retire: function (age) {
+      var m = (age === "25-35") ? "你最大的资产是时间：每月一笔小额定投比「等有钱再说」值钱十倍，股的占比可以取参考带上沿。"
+            : (age === "46-55") ? "攻坚期的关键是「锁长」：把一部分钱换成期限更长的债券/储蓄类资产，把十年后的自己先安排好。"
+            : (age === "56-65" || age === "66+") ? "临近退休与退休期，确定性压倒收益性：年金类现金流 + 短久期债券为主，权益仓位取参考带下沿。"
+            : "养老是场马拉松，先确认「定投这件事在自动发生」，再谈收益率。";
+      return { t: "把未来的自己先安排好", w: m };
+    },
+    edu: function () {
+      return { t: "教育金要「专款专用、确定性优先」", w: "孩子上学的年份是刚性的，不能拿去承受市场波动：用储蓄型保险或短债单独装教育金，不与投资仓混用；留学/私立等大额支出提前 3–5 年布局。" };
+    },
+    health: function () {
+      return { t: "医疗通胀比物价通胀更快", w: "先检查全家四件套是否齐全：医保、百万医疗、重疾（收入补偿）、意外——保额不够比保费贵更危险；家里有老人尤其要补齐医疗保障。" };
+    },
+    mortgage: function () {
+      return { t: "给月供画一条压力线", w: "月供不超过家庭月收入 1/3 是底线：若接近或超过，优先补应急金而非提前还贷；同时确认有足额定期寿险，让「还贷的人」有备份。" };
+    },
+    market: function () {
+      return { t: "波动是门票，不是敌人", w: "按参考带配置 + 分批买入 + 每年一次再平衡，就等于把「猜涨跌」从系统里删掉了；少看盘，多看年度再平衡日历。" };
+    }
+  };
+  var FREE_RULES = [
+    { re: /裁员|降薪|失业|离职|优化|欠薪|公司.*不行|行业.*不行|待岗/,
+      a: "收入端的不确定性是当前第一风险——按「失业降薪」的打法处理：应急现金拉满、暂缓大额长锁支出、保单缴费期内务必留出续费现金。" },
+    { re: /房贷|还贷|月供|贷款|利息.*还/,
+      a: "房贷是家庭现金流最大的刚性支出：对照方案④的压力线自查月供占比，并确认有定期寿险兜底。" },
+    { re: /孩子|儿子|女儿|小孩|娃|初中|高中|小学|大学|留学|教育/,
+      a: "关于孩子：教育支出是「日期确定的大额刚性支出」，建议独立账户、确定性工具（储蓄险/短债）承载，不与投资仓混用。" },
+    { re: /老人|父母|爸妈|赡养|住院.*(爸|妈|老人)|老人.*生病/,
+      a: "关于父母：赡养与医疗是双线压力——先补齐父母的医疗保障（医疗险/意外险，能用就配），再评估长期照护的现金储备。" },
+    { re: /生病|住院|体检|手术|身体|健康|确诊/,
+      a: "健康方面的担忧，落点是把「医疗费风险」转出去：核对全家保额是否覆盖一场大病的中位开销（30–50 万），不够先补医疗险。" },
+    { re: /存款|利率|利息|降息|存单|理财.*亏|理财.*收益/,
+      a: "你感受到的「钱越来越不值钱」是利率下行的直接体感：这正是方案中「锁久期、债基摊开买」的原因——锁定当下还看得见的长期利率。" },
+    { re: /股|基金|亏|套|跌|割|抄底|满仓/,
+      a: "市场带来的焦虑，用规则对抗情绪：参考带内配置、分批进入、每年再平衡一次，其余时间允许自己不看盘。" },
+    { re: /退休|养老|老了|年金/,
+      a: "退休相关：先算「每月现金流缺口」（退休金 vs 期望生活费），缺口用年金/分红类确定性现金流填补。" },
+    { re: /睡不着|焦虑|压力|失眠|喘不过气|恐慌|怕/,
+      a: "先说一句：财务焦虑大多数来自「没有一张写下来的清单」。这份方案就是那张清单——按①→⑤顺序做完前两件事，睡眠通常会先回来一半。" }
+  ];
+  function buildPersonal(plan, fam, freeText) {
+    var rows = [], i;
+    // 画像
+    var famTxt = fam.map(function (k) { return FAM_LABEL[k]; }).filter(Boolean).join(" · ") || "标准家庭结构";
+    var anxTxt = plan.profile.anxieties.map(function (k) { return ANX_LABEL[k] || k; }).join("、") || "无特别勾选";
+    rows.push({ h: "你的画像", w: AGE_LABEL[plan.profile.ageGroup] + " · " + famTxt + " · 睡不着的事：<b>" + anxTxt + "</b>" });
+    // 焦虑逐条回应
+    plan.profile.anxieties.forEach(function (k) {
+      var fn = ANX_ADVICE[k];
+      if (fn) { var r = fn(plan.profile.ageGroup); rows.push({ h: "回应焦虑「" + (ANX_LABEL[k] || k) + "」：" + r.t, w: r.w }); }
+    });
+    // 家庭结构加成提醒
+    if (fam.indexOf("parents") >= 0 && plan.profile.anxieties.indexOf("health") < 0)
+      rows.push({ h: "家庭结构提醒", w: "你勾选了「需赡养父母」但没勾健康焦虑——父母的医疗费是中产返贫三件套之首，建议按方案③补齐父母医疗保障。" });
+    if (fam.indexOf("kids") >= 0 && plan.profile.anxieties.indexOf("edu") < 0)
+      rows.push({ h: "家庭结构提醒", w: "子女在学的家庭，教育金是 5–10 年内确定要花的一笔钱，建议即便没勾教育焦虑，也把方案③中的确定性资产单列一份。" });
+    // 选填逐点回应
+    if (freeText) {
+      rows.push({ h: "你补充的原话", w: "「<b>" + esc(freeText) + "</b>」——以下是逐点回应：", quote: true });
+      var hit = 0;
+      FREE_RULES.forEach(function (r) {
+        if (r.re.test(freeText)) { rows.push({ h: "▪ 针对上面提到的内容", w: r.a }); hit++; }
+      });
+      if (!hit) rows.push({ h: "▪ 整体回应", w: "你说的这件事我记下了。它不改变方案的数字，但改变了执行的顺序：先把方案④的风险守正清单做完（应急金+保额核对），让最坏情形有兜底，再谈其余——把不确定装进清单里，是缓解失眠最有效的一步。" });
+    }
+    return rows;
+  }
+  function renderPersonal(plan, fam, freeText) {
+    var rows = buildPersonal(plan, fam, freeText);
+    return rows.map(function (r) {
+      if (r.quote) return '<p style="background:rgba(187,138,31,0.1);border-left:4px solid #bb8a1f;border-radius:0 10px 10px 0;padding:10px 14px;margin:10px 0">' + r.h + "<br>" + r.w + "</p>";
+      return '<p style="margin:10px 0"><b style="color:#b53d2e;font-family:var(--serif)">' + r.h + "</b><br>" +
+        '<span style="font-size:15px">' + r.w + "</span></p>";
+    }).join("");
+  }
+
+  /* ---------- 增强：投资/保险/风险/四问 四段的针对性内容 ---------- */
+  function augmentPlan(plan, fam, freeText) {
+    var anx = plan.profile.anxieties, age = plan.profile.ageGroup;
+    var has = function (k) { return anx.indexOf(k) >= 0; };
+    var famHas = function (k) { return fam.indexOf(k) >= 0; };
+    var aug = { inv: [], ins: [], risk: [], four: {} };
+
+    // —— 投资配置 · 针对性 ——
+    if (has("job")) aug.inv.push({ t: "现金流优先校验", w: "在参考带内取现金/短债偏高的一侧：万一收入中断 12 个月，也不必被迫在低点卖出任何资产。" });
+    if (has("market")) aug.inv.push({ t: "波动应对纪律", w: "分 6–12 个月分批建仓 + 每年固定一天再平衡，其余时间不看盘——用规则替代猜涨跌。" });
+    if (has("retire") && (age === "25-35" || age === "36-45")) aug.inv.push({ t: "权益占比取向上沿", w: "养老这场马拉松里你的最大本钱是时间，权益占比可取参考带上沿，波动交给年限消化。" });
+    if (has("retire") && (age === "46-55" || age === "56-65" || age === "66+")) aug.inv.push({ t: "权益占比取向下沿 + 锁长", w: "离用钱的时间越近，权益越取带内下沿；同时把一部分资金换成长久期债券，锁定当下利率。" });
+    if (famHas("mortgage")) aug.inv.push({ t: "月供联动检查", w: "先确认月供 ≤ 家庭月收入 1/3，再谈权益仓位——被房贷挤出的现金流，不能用高风险资产去「赚回来」。" });
+    if (famHas("kids")) aug.inv.push({ t: "教育金隔离", w: "上面的参考带是家庭长期资产的带；孩子未来 5–10 年确定要用的教育钱，请单独用确定性工具（储蓄险/短债）装，不计入参考带。" });
+    if (freeText && /存款|利率|降息|利息/.test(freeText)) aug.inv.push({ t: "利率下行应对", w: "存款利率一路下行的体感没错——对策不是「找更高收益的冒险」，而是在参考带内把债的部分换成更长久期，锁定当下的利率。" });
+    if (freeText && /股|基金|亏|套|跌/.test(freeText)) aug.inv.push({ t: "亏损后重建", w: "若已有浮亏仓位：不追加杠杆、不一次性摊平，用新钱按参考带分批回归；浮仓的处理可以放到 99 元体检里逐笔看。" });
+
+    // —— 保险配置 · 针对性 ——
+    if (has("job")) aug.ins.push({ t: "保单续费保护", w: "失业风险期，把所有保单年缴保费总额 × 2 列入应急现金——断缴导致的保单失效比省下的保费贵得多。" });
+    if (has("health")) aug.ins.push({ t: "保额自查动作", w: "重疾保额 ≥ 家庭 3 年刚性支出（通常 30–50 万）为合格线；医疗险确认覆盖外购药与质子重离子。" });
+    if (has("mortgage") || famHas("mortgage")) aug.ins.push({ t: "定期寿险兜底月供", w: "保额 ≥ 房贷余额，受益人写家人——让「还贷的人」有备份，这是有房贷家庭保险配置的第一优先级。" });
+    if (famHas("parents")) aug.ins.push({ t: "父母医疗保障", w: "父母年龄与体况决定还能不能买商业医疗险：能买立即配（医疗+意外），买不了则评估惠民保与自备医疗专项现金。" });
+    if (famHas("kids")) aug.ins.push({ t: "少儿保障双件套", w: "少儿医疗险 + 少儿意外险价格极低优先配齐；教育金类储蓄险用「专款专用」的独立账户承载，不与保障型保单混谈。" });
+    if (freeText && /生病|住院|体检|手术|确诊/.test(freeText)) aug.ins.push({ t: "已有健康问题的路径", w: "若健康告知已有异常：优先尝试智能核保/人工核保多家投保，被拒再考虑惠民保——带病投保的顺序很讲究，别乱买。" });
+
+    // —— 风险守正 · 针对性 ——
+    if (has("job") || (freeText && /裁员|降薪|失业|离职/.test(freeText))) aug.risk.push({ t: "失业演练", w: "现在就写下：若下月收入归零，家庭月刚性支出是多少、能撑几个月——写出来的那一刻，焦虑会先降一半。" });
+    if (famHas("mortgage") || has("mortgage")) aug.risk.push({ t: "月供压力线", w: "月供/月收入 > 1/3 时，任何新增投资计划都先暂停；> 1/2 时优先考虑降低月供而不是增加资产。" });
+    if (famHas("kids")) aug.risk.push({ t: "教育金不可挪用纪律", w: "教育金账户与投资账户物理分开（不同产品、不同银行卡），确保市场再差也动不到孩子的学费。" });
+    if (famHas("parents")) aug.risk.push({ t: "父母医疗储备", w: "预留一笔父母专项医疗现金（建议 5–10 万起），并核实父母医保异地就医备案是否办妥。" });
+    if (has("market")) aug.risk.push({ t: "杠杆与仓位红线", w: "任何时候不融资、不满仓单一资产、不借钱投资——市场波动不会让人破产，加杠杆的波动才会。" });
+    if (has("health") || (freeText && /生病|住院|健康/.test(freeText))) aug.risk.push({ t: "家庭病历档案", w: "把全家保单、体检异常项、既往病史整理成一页纸——理赔时它能决定 30 天到账还是 300 天扯皮。" });
+
+    // —— 待时四问 · 针对性答案 ——
+    var firstThing = has("job") ? "把应急现金补到目标月数（见方案④）——它是你所有焦虑的总开关"
+      : has("health") ? "核对全家保额是否达到合格线（见方案③）"
+      : famHas("mortgage") ? "测算月供压力线并确认有定期寿险兜底"
+      : famHas("kids") ? "把教育金从家庭资产中单独隔离出来"
+      : has("retire") ? "确认养老定投已在自动发生"
+      : "按方案④做一次家庭风险清单自查";
+    aug.four.now = "针对你：" + firstThing + "。本周就能完成的第一小步：打开银行/保单 App，把数字抄下来。";
+    aug.four.future = "针对你（" + AGE_LABEL[age] + "）：" +
+      (age === "25-35" ? "未来五年最重要的事是把「自动定投 + 应急金」这两台机器建好，不求收益惊艳，求系统成立。"
+      : age === "36-45" ? "未来五年最重要的不是多赚，而是给三座山（教育/养老/父母医疗）各建一个独立账户——钱有了名字，就不会乱跑。"
+      : age === "46-55" ? "未来五年是「锁长窗口」：利率下行期锁定长期收益的动作，越早完成越值钱；同时权益仓位逐年降档。"
+      : "未来五年最重要的事是「年金化」：把一部分资产换成确定领取的现金流，让养老生活费的来源与市场涨跌脱钩。");
+    aug.four.risk = "针对你：" +
+      (famHas("mortgage") ? "最坏情形 = 收入中断 + 月供刚性 + 资产低位。解法已在方案④：应急金 + 定期寿险 + 现金流优先，三件套缺一不可。"
+      : has("health") ? "最坏情形 = 一场大病的医疗费 + 收入中断双重打击。医疗险管医疗费、重疾险管收入损失，两件事不要混为一谈。"
+      : "最坏情形 = 资产腰斩时恰好要用钱。解法是流动性分层：现金层管 1 年，短债层管 3 年，权益层 5 年内不动。");
+    aug.four.opportunity = "针对你：" +
+      (has("retire") && (age === "46-55" || age === "56-65" || age === "66+")
+      ? "利率下行期是「锁长」的机会窗：当下还看得见的长期利率，可能是未来十年里最高的一档——这正是「藏器于身」的器。"
+      : age === "25-35" ? "你的机会在「时间复利 + 低点筹码」：市场冷清期的定投份额，是用同等的钱买到了更多份额——别浪费它。"
+      : "机会在「别人恐慌时的再平衡」：每年按参考带把涨多的卖出、跌多的补入，这个纪律本身就是长期超额的来源。");
+    return aug;
+  }
+  function augHtml(list) {
+    if (!list || !list.length) return "";
+    return list.map(function (r) {
+      return '<p style="margin:8px 0"><b style="color:#b53d2e">🔧 针对你 · ' + r.t + "</b><br>" +
+        '<span style="font-size:15px">' + r.w + "</span></p>";
+    }).join("");
+  }
+
+  function renderReport(plan, fam, freeText) {
     $("report").style.display = "";
+    var famTxt = fam.map(function (k) { return FAM_LABEL[k]; }).filter(Boolean).join(" · ");
     $("report-meta").textContent = plan.profile.ageGroup + " 岁 · " +
-      (plan.profile.anxieties.join("、") || "无特别焦虑") +
-      (plan.profile.hasMortgage ? " · 有房贷" : "");
+      (famTxt || "标准家庭") + " · " +
+      (plan.profile.anxieties.join("、") || "无特别焦虑");
+    // ◎ 针对你的情况（定制层）
+    $("r-personal").innerHTML = renderPersonal(plan, fam, freeText);
+    var aug = curCtx.aug = augmentPlan(plan, fam, freeText);
     // 1 趋势
     $("r-trend").textContent = plan.trend.text;
     $("r-trend-url").href = plan.trend.url;
@@ -253,17 +548,25 @@
     $("r-invest-links").innerHTML = plan.investLinks.map(function (l) {
       return '<li><a href="' + l.url + '" target="_blank" rel="noopener">' + l.t + '</a></li>';
     }).join("");
+    $("r-invest-aug").innerHTML = augHtml(aug.inv);
     // 3 保险
     $("r-insurance").innerHTML = plan.insurance.map(liHtml).join("");
+    $("r-insurance-aug").innerHTML = augHtml(aug.ins);
     // 4 风险
     $("r-emergency").textContent = plan.risk.emergencyMonths;
     $("r-risk").innerHTML = plan.risk.items.map(liHtml).join("");
+    $("r-risk-aug").innerHTML = augHtml(aug.risk);
     // 5 四问
     var fq = plan.fourQuestions;
     $("r-fourq").innerHTML = ["now", "future", "risk", "opportunity"].map(function (k) {
-      return '<div style="margin-bottom:12px"><b style="font-family:var(--serif);color:#b53d2e">问：' +
-        fq[k].q + '</b><br><span style="font-size:15px">' + fq[k].a + "</span></div>";
+      var h = '<div style="margin-bottom:12px"><b style="font-family:var(--serif);color:#b53d2e">问：' +
+        fq[k].q + '</b><br><span style="font-size:15px">' + fq[k].a + "</span>";
+      if (aug.four[k]) {
+        h += '<br><span style="font-size:15px;color:#2f6b5a">' + aug.four[k] + "</span>";
+      }
+      return h + "</div>";
     }).join("");
+    $("r-fourq-aug").innerHTML = "";
     // zen
     $("r-zen-list").innerHTML = plan.zen.map(function (s) {
       return "<p>" + s + "</p>";
@@ -273,45 +576,276 @@
     return plan;
   }
 
-  function llmCall(cfg, plan, freeText) {
+  function llmCall(cfg, plan, freeText, onDelta) {
+    // 各服务商输出上限（超限会 400，故按服务商取上限映射）
+    var MT_MAX = { deepseek: 8192, siliconflow: 8192, zhipu: 4095, moonshot: 8000, qwen: 8192, ollama: 8192, custom: 8192 };
     var prompt =
-      "你是一位资深精算师朋友（「西红精算」品牌），正在为一个中产家庭解读他刚生成的「守正待时」财富方案。" +
-      "请用温暖、说人话、结构清晰的中文（800字内）解读以下方案数据，重点：解释为什么这样配置、优先做哪件事、" +
-      "给一句最需要记住的话。禁止编造新数字、禁止推荐具体产品或个股、禁止更改方案数据。" +
-      "\n\n用户情况：年龄段=" + plan.profile.ageGroup + "，焦虑=" +
+      "请为下面这位中产朋友解读他刚生成的「守正待时」财富方案，要求：\n" +
+      "1. 开头第一句必须是：朋友你好。\n" +
+      "2. 正文 800–2000 字，温暖、说人话、结构清晰（可用小标题分段）。\n" +
+      "3. 对方给出的信息越具体，你的解读越具体：必须逐条回应他的每一条焦虑，" +
+      "尤其要认真消化「补充描述」里的原话——那里有他睡不着的地方，要有针对性地安抚并给出可执行的第一步。\n" +
+      "4. 解释为什么这样配置、现在最优先做哪一件事、最后给一句最需要记住的话。\n" +
+      "5. 所有数字只来自方案数据：禁止编造新数字、禁止推荐具体产品或个股、禁止更改方案数据。\n" +
+      "6. 只输出答案正文：不要展示任何思考过程、推理链、<think> 段落；" +
+      "答案结尾也不要附加「检查」「自评」「小结说明」「免责声明清单」之类的内容，说完即止。\n" +
+      "\n用户情况：年龄段=" + plan.profile.ageGroup + "，焦虑=" +
       plan.profile.anxieties.join("、") + "，有房贷=" + plan.profile.hasMortgage +
-      (freeText ? "，补充描述=" + freeText : "") +
+      (freeText ? "，补充描述=" + freeText : "（未填写补充描述）") +
       "\n方案数据（JSON）：" + JSON.stringify({
         alloc: plan.alloc, trendRegime: plan.trend.regime,
         emergencyMonths: plan.risk.emergencyMonths,
         insurance: plan.insurance.map(function (r) { return r.item; })
       });
+    var isReasoner = /reasoner|r1|thinking/i.test(cfg.model || "");
     var body = JSON.stringify({
-      model: cfg.model || "deepseek-chat",
-      messages: [
+      model: cfg.model,
+      messages: isReasoner ? [
+        { role: "user", content: "你是西红精算，一位用真心做科普的资深精算师朋友。只基于给定数据解读，不编造数字。\n\n" + prompt }
+      ] : [
         { role: "system", content: "你是西红精算，一位用真心做科普的资深精算师朋友。只基于给定数据解读，不编造数字。" },
         { role: "user", content: prompt }
       ],
-      temperature: 0.7, max_tokens: 1200
+      temperature: isReasoner ? undefined : 0.7,
+      max_tokens: isReasoner ? 16000 : (MT_MAX[cfg.provider] || 8192),
+      stream: true
     });
     var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 30000);
-    return fetch(cfg.endpoint, {
+    /* 空闲超时：每收到数据就重置；总上限 150 秒 */
+    var idleMs = 45000, startedAt = Date.now();
+    var idleTimer = setTimeout(function () { ctrl.abort(); }, idleMs);
+    function armIdle() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function () { ctrl.abort(); }, idleMs);
+    }
+    function cleanThink(t) {
+      return String(t)
+        .replace(/<think>[\s\S]*?<\/think>/gi, "")
+        .replace(/^(思考|推理)(过程)?[:：][\s\S]*?(?=朋友你好|（|\n\n)/, "")
+        .replace(/[-—－]{2,}\s*(检查|自评|自我点评|说明)[：:][\s\S]*$/i, "")
+        .replace(/【?(检查|自评|自我点评)】?[:：][\s\S]*$/i, "")
+        .trim();
+    }
+    return fetch(chatUrl(cfg.base), {
       method: "POST",
       headers: { "Content-Type": "application/json",
         "Authorization": "Bearer " + cfg.key },
       body: body, signal: ctrl.signal
     }).then(function (r) {
-      clearTimeout(timer);
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.json();
-    }).then(function (j) {
-      var txt = j.choices && j.choices[0] && j.choices[0].message &&
-        j.choices[0].message.content;
-      if (!txt) throw new Error("响应格式异常");
-      return txt.trim();
+      if (!r.ok) {
+        return r.text().then(function (t) {
+          throw new Error("HTTP " + r.status + " — " + adviceFor(r.status, t));
+        });
+      }
+      /* 流式读取 SSE；网关若直接回完整 JSON 也能兜住 */
+      var reader = r.body.getReader();
+      var dec = new TextDecoder("utf-8");
+      var buf = "", full = "", finish = "";
+      function finalize() {
+        clearTimeout(idleTimer);
+        var txt = cleanThink(full);
+        if (!txt) throw new Error("响应格式异常（模型未返回正文" +
+          (/reasoner|r1|thinking/i.test(cfg.model || "") ? "，推理型模型建议换 deepseek-chat" : "") + "）");
+        if (finish === "length") {
+          txt += "\n（提示：本次输出因长度上限被截断，已展示可用部分；如需更完整可重新生成。）";
+        }
+        return txt;
+      }
+      function pump() {
+        return reader.read().then(function (res) {
+          if (res.done) {
+            if (!full && buf.trim()) {
+              /* 网关返回了完整 JSON 而非 SSE */
+              try {
+                var j = JSON.parse(buf);
+                var msg = (j.choices && j.choices[0] && (j.choices[0].message || j.choices[0].delta)) || {};
+                full = msg.content || msg.text || "";
+                finish = (j.choices && j.choices[0] && j.choices[0].finish_reason) || "";
+              } catch (e) {}
+            }
+            return finalize();
+          }
+          armIdle();
+          if (Date.now() - startedAt > 240000) { ctrl.abort(); return finalize(); }
+          buf += dec.decode(res.value, { stream: true });
+          var lines = buf.split("\n");
+          buf = lines.pop();
+          for (var i = 0; i < lines.length; i++) {
+            var t = lines[i].trim();
+            if (t.indexOf("data:") !== 0) continue;
+            var d = t.slice(5).trim();
+            if (d === "[DONE]") continue;
+            try {
+              var o = JSON.parse(d);
+              var ch = o.choices && o.choices[0] || {};
+              var piece = (ch.delta && ch.delta.content) || ch.text || "";
+              if (piece) { full += piece; if (onDelta) onDelta(full); }
+              if (ch.finish_reason) finish = ch.finish_reason;
+            } catch (e) {}
+          }
+          return pump();
+        });
+      }
+      return pump();
+    }).catch(function (e) {
+      clearTimeout(idleTimer);
+      if (e.name === "AbortError") throw new Error("连接中断（服务商 45 秒无新内容），稍后再试或换 deepseek-chat");
+      throw e;
     });
   }
+
+  /* ---------- AI 文本 → 排版 HTML ---------- */
+  function cleanForRender(t) {
+    /* 流式渲染时剥掉思考块（含未闭合的） */
+    return String(t)
+      .replace(/<think>[\s\S]*?<\/think>/gi, "")
+      .replace(/<think>[\s\S]*$/i, "");
+  }
+  function aiInline(s) {
+    return esc(s)
+      .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+      .replace(/【([^】]{2,16})】/g, "<b>【$1】</b>");
+  }
+  function aiToHtml(txt) {
+    var lines = String(txt).split(/\r?\n/);
+    var out = [], i, t, m;
+    for (i = 0; i < lines.length; i++) {
+      t = lines[i].trim();
+      if (!t) continue;
+      // 小标题：###、一、、【标题】、以冒号结尾的短行
+      if (/^#{1,4}\s+/.test(t)) {
+        out.push('<div class="ai-h">' + aiInline(t.replace(/^#{1,4}\s+/, "")) + "</div>");
+        continue;
+      }
+      if ((m = t.match(/^([一二三四五六七八九十]+)[、.．]\s*(.{2,24})$/))) {
+        out.push('<div class="ai-h">' + m[1] + "、" + aiInline(m[2]) + "</div>");
+        continue;
+      }
+      if (/^【.{2,16}】$/.test(t)) {
+        out.push('<div class="ai-h">' + aiInline(t) + "</div>");
+        continue;
+      }
+      // 开头问候
+      if (out.length === 0 && /^朋友你好/.test(t)) {
+        out.push('<p class="ai-open">' + aiInline(t) + "</p>");
+        continue;
+      }
+      // 暖心话 / 最需要记住的话 → 琥珀卡
+      if (/记住|写在最后|最重要的一句|暖心/.test(t) && t.length < 160) {
+        out.push('<div class="ai-warm">' + aiInline(t) + "</div>");
+        continue;
+      }
+      // 核心结论行
+      if (/^(核心结论|一句话|结论)[:：]/.test(t)) {
+        out.push('<p class="ai-core">' + aiInline(t) + "</p>");
+        continue;
+      }
+      out.push("<p>" + aiInline(t) + "</p>");
+    }
+    return out.join("");
+  }
+
+  /* ---------- 保存 / 转发 ---------- */
+  var curPlan = null, curAiText = "", curCtx = { fam: [], freeText: "" };
+  function planSummaryText() {
+    var p = curPlan, full = !window.WGate || window.WGate.unlocked();
+    var famTxt = curCtx.fam.map(function (k) { return FAM_LABEL[k]; }).filter(Boolean).join(" · ") || "标准家庭";
+    var s = "守正待时 · 家庭财富方案\n" +
+      "——————————————\n" +
+      "情况：" + p.profile.ageGroup + " 岁组 · " + famTxt + " · 焦虑=" +
+      (p.profile.anxieties.join("、") || "无") + "\n\n" +
+      "◎ 针对你的情况：\n" +
+      buildPersonal(p, curCtx.fam, curCtx.freeText).map(function (r) {
+        return "  · " + r.h.replace(/<[^>]*>/g, "") + "：" + r.w.replace(/<[^>]*>/g, "");
+      }).join("\n") + "\n\n" +
+      "① 趋势判断：" + p.trend.text + "\n\n" +
+      "② 参考配置带：股 " + p.alloc.eq + "% / 债 " + p.alloc.bond + "% / 金 " +
+      p.alloc.gold + "% / 现金 " + p.alloc.cash + "%\n";
+    var aug = curCtx.aug;
+    function augTxt(list) {
+      return (list || []).map(function (r) { return "  · [针对你] " + r.t + "：" + r.w; }).join("\n");
+    }
+    if (aug && aug.inv.length) s += "  投资针对性：\n" + augTxt(aug.inv) + "\n";
+    if (!full) {
+      s += "\n（保险清单、风险守正、待时四问为完整方案内容，需口令解锁后保存/转发——回到网站输入阅读口令即可）\n";
+      return s;
+    }
+    s += "\n③ 保险配置（藏器于身）：\n" +
+      p.insurance.map(function (r) { return "  · " + r.item + " — " + r.why; }).join("\n") + "\n" +
+      (aug && aug.ins.length ? augTxt(aug.ins) + "\n" : "") +
+      "\n④ 风险守正：应急现金底线 " + p.risk.emergencyMonths + " 个月家庭刚性支出\n" +
+      p.risk.items.map(function (r) { return "  · " + r.item + " — " + r.why; }).join("\n") + "\n" +
+      (aug && aug.risk.length ? augTxt(aug.risk) + "\n" : "") +
+      "\n⑤ 待时四问：\n" +
+      ["now", "future", "risk", "opportunity"].map(function (k) {
+        return "  问：" + p.fourQuestions[k].q + "\n  答：" + p.fourQuestions[k].a +
+          (aug && aug.four[k] ? "\n  [定制] " + aug.four[k] : "");
+      }).join("\n") + "\n";
+    if (curAiText) s += "\n⑥ AI 朋友解读：\n" + curAiText + "\n";
+    s += "\n——————————————\n生成于 " + p.generatedAt +
+      " · 西红精算 · 不构成投资建议，具体决策请咨询持牌人士\nhttps://xihongactuary.github.io/wealth-gk/";
+    return s;
+  }
+  function planSummaryHtml() {
+    var p = curPlan, full = !window.WGate || window.WGate.unlocked();
+    function li(rr) { return "<li><b>" + esc(rr.item) + "</b> — " + esc(rr.why) + "</li>"; }
+    var h = '<div style="font-family:\'Noto Serif SC\',Georgia,serif;max-width:760px;margin:0 auto;padding:34px 22px;line-height:1.95;color:#2b2a26;background:#f5f1e6;min-height:100vh">' +
+      '<h1 style="font-size:26px;letter-spacing:4px;margin:0 0 6px">守正待时 · 家庭财富方案</h1>' +
+      '<div style="font-size:13px;color:#8a857a;margin-bottom:22px">' + esc(p.generatedAt) + ' · 西红精算 · 用数据讲保险，用真心做科普</div>' +
+      '<div style="background:#fffdf8;border:1px solid rgba(187,138,31,0.4);border-radius:12px;padding:18px 20px;margin-bottom:16px">' +
+      '<b style="color:#bb8a1f">◎ 针对你的情况 · 本次方案的定制点</b>' +
+      renderPersonal(p, curCtx.fam, curCtx.freeText) + '</div>' +
+      '<div style="background:#fffdf8;border:1px solid rgba(43,42,38,0.12);border-radius:12px;padding:18px 20px;margin-bottom:16px">' +
+      '<b style="color:#b53d2e">情况</b>：' + esc(p.profile.ageGroup) + ' 岁组 · 焦虑=' + esc(p.profile.anxieties.join("、") || "无") + (p.profile.hasMortgage ? " · 有房贷" : "") +
+      '<br><b style="color:#b53d2e">① 趋势判断</b>：' + esc(p.trend.text) +
+      '<br><b style="color:#b53d2e">② 参考配置带</b>：股 ' + p.alloc.eq + '% / 债 ' + p.alloc.bond + '% / 金 ' + p.alloc.gold + '% / 现金 ' + p.alloc.cash + '%' +
+      (curCtx.aug && curCtx.aug.inv.length ? augHtml(curCtx.aug.inv) : "") + '</div>';
+    if (!full) {
+      h += '<div style="background:#fffdf8;border:1px dashed rgba(181,61,46,0.5);border-radius:12px;padding:18px 20px;color:#5a564d">保险清单、风险守正、待时四问为<b style="color:#b53d2e">完整方案</b>内容，需阅读口令解锁后保存/转发。回 <b>xihongactuary.github.io/wealth-gk</b> 输入口令即可。</div>';
+    } else {
+      h += '<div style="background:#fffdf8;border:1px solid rgba(43,42,38,0.12);border-radius:12px;padding:18px 20px;margin-bottom:16px">' +
+        '<b style="color:#b53d2e">③ 保险配置（藏器于身）</b><ul style="margin:8px 0 0;padding-left:20px">' + p.insurance.map(li).join("") + '</ul>' +
+        augHtml(curCtx.aug && curCtx.aug.ins) +
+        '<p style="margin:12px 0 0"><b style="color:#b53d2e">④ 风险守正</b>：应急现金底线 ' + p.risk.emergencyMonths + ' 个月家庭刚性支出</p>' +
+        '<ul style="margin:8px 0 0;padding-left:20px">' + p.risk.items.map(li).join("") + '</ul>' +
+        augHtml(curCtx.aug && curCtx.aug.risk) +
+        '<p style="margin:12px 0 0"><b style="color:#b53d2e">⑤ 待时四问</b></p>' +
+        ["now", "future", "risk", "opportunity"].map(function (k) {
+          return '<p style="margin:8px 0 0"><b>问：' + esc(p.fourQuestions[k].q) + '</b><br><span style="font-size:14px">' + esc(p.fourQuestions[k].a) + '</span>' +
+            (curCtx.aug && curCtx.aug.four[k] ? '<br><span style="font-size:14px;color:#2f6b5a;background:rgba(47,107,90,0.08);display:block;border-radius:8px;padding:8px 10px;margin-top:6px">🔧 ' + esc(curCtx.aug.four[k]) + '</span>' : "") + '</p>';
+        }).join("") + '</div>';
+    }
+    if (full && curAiText) {
+      h += '<div style="background:#fffdf8;border:1px solid rgba(187,138,31,0.4);border-radius:12px;padding:18px 20px;margin-bottom:16px">' +
+        '<b style="color:#bb8a1f">✦ AI 朋友解读</b><br>' + aiToHtml(curAiText) + '</div>';
+    }
+    h += '<p style="font-size:12px;color:#8a857a">本方案由确定性规则引擎生成，不构成投资建议或保险购买建议；具体决策请结合自身情况并咨询持牌人士。<br>西红精算 · xihongactuary.github.io/wealth-gk</p></div>';
+    return h;
+  }
+  function doSave() {
+    if (!curPlan) { setStatus("请先生成方案"); return; }
+    setStatus("正在生成文件…");
+    try {
+      var html = "<!DOCTYPE html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\">" +
+        "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+        "<title>守正待时 · 家庭财富方案</title></head><body style=\"margin:0\">" +
+        planSummaryHtml() + "</body></html>";
+      var blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "守正待时方案-" + curPlan.generatedAt.replace(/\D/g, "").slice(0, 8) + ".html";
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+      setStatus("已开始下载 ✓（见浏览器下载栏）");
+    } catch (e) {
+      setStatus("保存失败：" + e.message);
+    }
+  }
+  function setStatus(msg) {
+    var el = $("share-status");
+    if (el) el.textContent = msg;
+  }
+  $("btn-save").addEventListener("click", doSave);
 
   $("btn-generate").addEventListener("click", function () {
     var anx = selectedKeys("anxiety-chips");
@@ -325,22 +859,39 @@
     var plan;
     try { plan = T.generatePlan(input); }
     catch (e) { alert(e.message); return; }
-    renderReport(plan);
+    curCtx = { fam: fam, freeText: freeText };
+    renderReport(plan, fam, freeText);
+    curPlan = plan; curAiText = "";
     // 完整方案口令门：摘要免费（趋势+配置带），完整方案需口令
     if (window.WGate) window.WGate.applyToReport();
 
     // AI 解读（可选）
     var cfg = null;
-    try { cfg = JSON.parse(localStorage.getItem(LLS_KEY) || "null"); } catch (e) {}
+    try { cfg = migrateCfg(JSON.parse(localStorage.getItem(LLS_KEY) || "null")); } catch (e) {}
     var sec = $("r-llm-section"), box = $("r-llm-text");
-    if (cfg && cfg.key) {
+    if (cfg && cfg.base && cfg.model && (cfg.key || cfg.provider === "ollama")) {
       sec.style.display = "";
-      box.textContent = "正在请 AI 朋友解读…（30 秒超时，失败不影响方案本身）";
-      llmCall(cfg, plan, freeText).then(function (txt) {
-        box.textContent = txt;
+      box.innerHTML = '<p style="color:#5a564d">正在请 AI 朋友解读…（边写边显示，稍等几秒开始）</p>';
+      var partial = "";
+      llmCall(cfg, plan, freeText, function (acc) {
+        partial = acc;
+        box.innerHTML = aiToHtml(cleanForRender(acc)) +
+          '<p style="color:#8a857a;font-size:13px">✍ 正在写…</p>';
+      }).then(function (txt) {
+        curAiText = txt;
+        box.innerHTML = aiToHtml(txt);
       }).catch(function (e) {
-        box.textContent = "AI 解读暂不可用（" + e.message +
-          "），以上规则引擎方案仍然完整有效。";
+        if (partial) {
+          /* 流式中断但已有部分内容：展示已生成部分 + 提示 */
+          curAiText = partial;
+          box.innerHTML = aiToHtml(partial) +
+            '<p style="color:#5a564d;font-size:13px">⚠ 传输中断（' + esc(e.message) +
+            '），以上为已生成的部分；点「生成方案」可重新获取完整版。</p>';
+        } else {
+          curAiText = "";
+          box.innerHTML = '<p style="color:#5a564d">AI 解读暂不可用（' + esc(e.message) +
+            '），以上规则引擎方案仍然完整有效。</p>';
+        }
       });
     } else {
       sec.style.display = "none";
